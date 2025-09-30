@@ -16,6 +16,10 @@ $offset = ($page - 1) * $limit;
 $m = 10;
 $C = 2.0;
 
+// FIX: Pre-calculate the value for the Bayesian adjustment.
+// You cannot perform arithmetic with two separate placeholders in a prepared statement.
+$m_times_C = $m * $C;
+
 $total = (int) $db->query("SELECT COUNT(*) FROM policies WHERE is_active=1")->fetchColumn();
 
 $sql = "
@@ -28,7 +32,8 @@ SELECT
   , p.created_at
   , COALESCE(a.n_votes,0) AS n_votes
   , COALESCE(a.sum_value,0) AS sum_value
-  , ((COALESCE(a.sum_value,0) + :m * :C) / (COALESCE(a.n_votes,0) + :m)) AS bayes_score
+  -- FIX: Use a single placeholder for the pre-calculated value.
+  , ((COALESCE(a.sum_value,0) + :m_times_C) / (COALESCE(a.n_votes,0) + :m)) AS bayes_score
 
 FROM policies p
 LEFT JOIN (
@@ -43,11 +48,13 @@ LIMIT :limit OFFSET :offset
 
 ";
 $st = $db->prepare($sql);
+
+// FIX: Bind the new pre-calculated value and remove the old :C binding.
+$st->bindValue(':m_times_C', $m_times_C);
 $st->bindValue(':m', $m, PDO::PARAM_INT);
-$st->bindValue(':C', $C);
 $st->bindValue(':limit', $limit, PDO::PARAM_INT);
 $st->bindValue(':offset', $offset, PDO::PARAM_INT);
-$st->execute();
+$st->execute(); // This was the line (50) causing the error
 $policies = $st->fetchAll();
 
 $lastPage = max(1, (int) ceil($total / $limit));

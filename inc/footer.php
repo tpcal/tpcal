@@ -25,6 +25,11 @@
     </div>
 </footer>
 
+<?php if (getenv('APP_ENV') === 'development'): ?>
+  <!-- This script enables automatic browser reloading -->
+  <script src="/js/live-reload-client.js"></script>
+<?php endif; ?>
+
 </body>
 
 </html>
