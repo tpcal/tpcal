@@ -10,6 +10,31 @@ This project uses Docker to create a consistent and easy-to-use development envi
 
 You must have [Docker](https://www.docker.com/products/docker-desktop/) and Docker Compose installed on your local machine.
 
+### Environment Variables
+
+The application uses a `.env` file to manage local environment variables, such as database credentials. This allows you to keep your sensitive information separate from the main codebase.
+
+Before running the application for the first time, you need to create your local environment file:
+
+1.  **Copy the example file:**
+    ```shell
+    cp .env.sample .env
+    ```
+
+2.  **Edit the `.env` file:**
+    Open the newly created `.env` file and customize the variables as needed for your local setup. The default values are typically configured to work with the provided Docker environment.
+
+    ```ini
+    # Environment variables for local development
+    DB_HOST=db
+    DB_PORT=3306
+    DB_NAME=tpcal
+    DB_USER=user
+    DB_PASS=password
+    ```
+
+**Note:** The `.env` file is listed in `.gitignore` and should never be committed to the repository. For production, these variables must be set directly on the server.
+
 ### Running the Application
 
 To start the entire development environment, simply run the following command in your terminal:
@@ -55,4 +80,3 @@ Then, run the Tailwind CSS watcher:
 ```shell
 npm run watch
 ```
-
